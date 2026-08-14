@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Search, User, Menu, X, Shield, Store, LayoutDashboard } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, Shield, Store, LayoutDashboard, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ZyvoraLogo } from '../branding/zyvora-logo';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
 import { useUIStore } from '../../store/ui-store';
@@ -25,15 +26,28 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/80 dark:bg-zinc-950/80 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 flex items-center justify-center font-black text-xl tracking-tighter shadow-md group-hover:scale-105 transition-transform">
-              Z
+          {/* Back & Forward Controls + Brand Logo */}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
+              <button
+                onClick={() => window.history.back()}
+                className="p-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => window.history.forward()}
+                className="p-1.5 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                title="Go Forward"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <span className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
-              ZYVORA
-            </span>
-          </Link>
+
+            <ZyvoraLogo theme="dark" variant="full" />
+          </div>
+
 
           {/* Search Bar */}
           <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md relative">

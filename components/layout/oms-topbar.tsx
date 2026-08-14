@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Bell, Shield, Sun, Moon, CheckCircle2, User } from 'lucide-react';
+import { Search, Bell, Shield, Sun, Moon, CheckCircle2, User, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../../store/auth-store';
 import { HRMSService } from '../../services/hrms.service';
 import { Notification } from '../../types/hrms';
@@ -34,12 +34,30 @@ export const OMSTopbar: React.FC<OMSTopbarProps> = ({ onOpenCommandPalette }) =>
 
   return (
     <header className="h-16 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-      {/* Left: Command Search Bar */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+      {/* Left: Back & Forward Controls + Command Search Bar */}
+      <div className="flex items-center gap-3 flex-1 max-w-xl">
+        <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800 shrink-0">
+          <button
+            onClick={() => window.history.back()}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            title="Go Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => window.history.forward()}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            title="Go Forward"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
         <button
           onClick={onOpenCommandPalette}
           className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:border-zinc-700 transition-all group"
         >
+
           <div className="flex items-center gap-2.5">
             <Search className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
             <span className="text-xs font-medium">Search operations, employees, projects...</span>

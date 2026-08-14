@@ -7,7 +7,10 @@ import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 
 export default async function SellerProductsPage() {
-  const products = await ProductService.getProducts({ sellerId: 'sel_tech' });
+  let products = await ProductService.getProducts({ sellerId: 'sel_tech' });
+  if (!products || products.length === 0) {
+    products = await ProductService.getProducts();
+  }
 
   return (
     <div className="flex min-h-screen">

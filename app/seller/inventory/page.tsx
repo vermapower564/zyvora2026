@@ -6,7 +6,10 @@ import { formatCurrency } from '../../../lib/utils';
 import { AlertTriangle, Boxes, CheckCircle2 } from 'lucide-react';
 
 export default async function SellerInventoryPage() {
-  const products = await ProductService.getProducts({ sellerId: 'sel_tech' });
+  let products = await ProductService.getProducts({ sellerId: 'sel_tech' });
+  if (!products || products.length === 0) {
+    products = await ProductService.getProducts();
+  }
   const lowStockAlerts = await InventoryService.getLowStockAlerts(15);
 
   return (

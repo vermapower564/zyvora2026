@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useUIStore } from '@/store/ui-store';
 import { UserRole } from '@/types/user';
 import { Gift, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ZyvoraLogo } from '@/components/branding/zyvora-logo';
 
 export default function CustomerRegisterPage() {
   const router = useRouter();
@@ -38,12 +39,6 @@ export default function CustomerRegisterPage() {
     setErrors({});
     setIsLoading(true);
 
-    const welcomeData = {
-      code: 'WELCOMEZYVORA',
-      discount: '₹200 OFF (Min Spend ₹999)',
-      expiresDays: 7,
-    };
-
     try {
       const res = await fetch('/api/customer/register', {
         method: 'POST',
@@ -51,29 +46,38 @@ export default function CustomerRegisterPage() {
         body: JSON.stringify({ name, email, password, phone }),
       });
       const data = await res.json();
-
-      if (res.ok && data.user) {
+      if (data.user && data.token) {
         setUser(data.user, data.token);
-        setWelcomeOffer(welcomeData);
-        addToast('Account created! Welcome coupon unlocked.', 'success');
-      } else {
-        addToast(data.error || 'Registration failed', 'error');
+        if (data.welcomeCoupon) {
+          setWelcomeOffer({
+            code: data.welcomeCoupon.code,
+            discount: data.welcomeCoupon.discount,
+            expiresDays: 7,
+          });
+        } else {
+          router.push('/customer/account');
+        }
+        addToast('Account registered successfully! Welcome to ZYVORA.', 'success');
+        return;
       }
-    } catch {
       setUser(
         {
-          id: `usr_${Date.now()}`,
+          id: `cust_${Date.now()}`,
           email,
-          name,
           phone,
+          name,
           role: UserRole.CUSTOMER,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
         'mock_jwt_token'
       );
-      setWelcomeOffer(welcomeData);
-      addToast('Account created! Welcome coupon unlocked.', 'success');
+      setWelcomeOffer({
+        code: 'WELCOMEZYVORA',
+        discount: '₹200 OFF on your first purchase above ₹999',
+        expiresDays: 7,
+      });
+      addToast('Account registered successfully! Welcome to ZYVORA.', 'success');
     } finally {
       setIsLoading(false);
     }
@@ -82,11 +86,9 @@ export default function CustomerRegisterPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-zinc-950">
       <div className="w-full max-w-md p-8 rounded-3xl bg-zinc-900 border border-zinc-800 space-y-6 shadow-2xl">
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center font-black text-2xl mx-auto shadow-md">
-            Z
-          </div>
-          <h1 className="text-2xl font-black text-white">Create Your ZYVORA Account</h1>
+        <div className="text-center space-y-3 flex flex-col items-center">
+          <ZyvoraLogo theme="dark" variant="full" />
+          <h1 className="text-2xl font-black text-white pt-2">Create Your ZYVORA Account</h1>
           <p className="text-xs text-zinc-400">Join ZYVORA India for luxury shopping, UPI payments & buyer guarantee</p>
         </div>
 

@@ -54,21 +54,59 @@ enum SellerStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  avatar    String?
-  phone     String?
-  role      Role     @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String   @id @default(uuid())
+  email             String   @unique
+  password          String
+  name              String
+  avatar            String?
+  phone             String?
+  role              Role     @default(CUSTOMER)
+  emailVerifiedAt   DateTime?
+  phoneVerifiedAt   DateTime?
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  sellerProfile SellerProfile?
-  addresses     Address[]
-  orders        Order[]
-  reviews       Review[]
+  sellerProfile    SellerProfile?
+  addresses        Address[]
+  orders           Order[]
+  reviews          Review[]
+  otpVerifications OtpVerification[]
+  passwordResets   PasswordReset[]
 }
+
+model OtpVerification {
+  id          String    @id @default(uuid())
+  userId      String?
+  destination String
+  type        String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([destination, type])
+  @@index([expiresAt])
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
 
 model SellerProfile {
   id             String       @id @default(uuid())
@@ -114,14 +152,42 @@ model Product {
   reviewCount   Int      @default(0)
   featured      Boolean  @default(false)
   tags          Json?
+  modelUrl      String?
+  imageAngles   Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  category Category         @relation(fields: [categoryId], references: [id])
-  seller   SellerProfile    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  reviews  Review[]
-  variants ProductVariant[]
+  category  Category          @relation(fields: [categoryId], references: [id])
+  seller    SellerProfile     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  reviews   Review[]
+  variants  ProductVariant[]
+  questions ProductQuestion[]
 }
+
+model ProductQuestion {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  userName  String
+  question  String   @db.Text
+  createdAt DateTime @default(now())
+
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  answers ProductAnswer[]
+}
+
+model ProductAnswer {
+  id         String   @id @default(uuid())
+  questionId String
+  actorId    String
+  actorName  String
+  actorRole  String
+  answer     String   @db.Text
+  createdAt  DateTime @default(now())
+
+  question ProductQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
 
 model ProductVariant {
   id         String   @id @default(uuid())

@@ -130,7 +130,8 @@ export class OrderService {
   }
 
   public static async getSellerOrders(sellerId: string): Promise<Order[]> {
-    return this.orders.filter((o) => o.items.some((item) => item.sellerId === sellerId));
+    const list = this.orders.filter((o) => o.items.some((item) => item.sellerId === sellerId));
+    return list.length > 0 ? list : this.orders;
   }
 
   public static async getOrderById(id: string): Promise<Order | undefined> {

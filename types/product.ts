@@ -35,6 +35,12 @@ export interface Product {
   reviewCount: number;
   featured: boolean;
   tags: string[];
+  modelUrl?: string;
+  imageAngles?: string[];
+  qualityScore?: number;
+  whyLikeIt?: string[];
+  bestFor?: string[];
   createdAt: string;
   updatedAt: string;
 }
+

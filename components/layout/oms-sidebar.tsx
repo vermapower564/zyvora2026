@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ZyvoraLogo } from '../branding/zyvora-logo';
 import {
   LayoutDashboard,
   Activity,
@@ -106,28 +107,16 @@ export const OMSSidebar: React.FC<OMSSidebarProps> = ({ collapsed, onToggleColla
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 px-5 border-b border-zinc-800 flex items-center justify-between shrink-0">
+      <div className="h-16 px-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
         {!collapsed ? (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-white text-black font-black flex items-center justify-center text-sm shadow-md">
-              O
-            </div>
-            <div>
-              <div className="text-sm font-black text-white leading-tight tracking-wider">OMS</div>
-              <div className="text-[10px] text-zinc-400 font-medium truncate max-w-[140px]">
-                Operations System
-              </div>
-            </div>
-          </div>
+          <ZyvoraLogo theme="dark" variant="full" />
         ) : (
-          <div className="w-8 h-8 mx-auto rounded-xl bg-white text-black font-black flex items-center justify-center text-sm">
-            O
-          </div>
+          <ZyvoraLogo theme="dark" variant="mark" />
         )}
 
         <button
           onClick={onToggleCollapse}
-          className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+          className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
           title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

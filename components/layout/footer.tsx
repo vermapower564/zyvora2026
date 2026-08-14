@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { ZyvoraLogo } from '../branding/zyvora-logo';
 
 export const Footer: React.FC = () => {
   return (
@@ -7,12 +8,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-zinc-800">
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white text-zinc-950 flex items-center justify-center font-black text-xl">
-                Z
-              </div>
-              <span className="text-2xl font-black tracking-tight text-white">ZYVORA</span>
-            </div>
+            <ZyvoraLogo theme="dark" variant="full" />
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
               Zyvora is the premier multi-vendor luxury commerce ecosystem and enterprise workspace management solution. Built with Next.js, Prisma, and Tailwind CSS.
             </p>
