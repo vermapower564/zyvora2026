@@ -42,9 +42,26 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
         }),
 
-      switchRole: (role: UserRole) =>
-        set((state) => ({
-          user: state.user
+      switchRole: async (role: UserRole) => {
+        try {
+          const res = await fetch('/api/auth/switch-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetRole: role }),
+          });
+          const data = await res.json();
+          if (data.user && data.token) {
+            if (typeof document !== 'undefined') {
+              document.cookie = `zyvora_token=${data.token}; path=/; max-age=604800`;
+            }
+            set({ user: data.user, token: data.token, isAuthenticated: true });
+            return;
+          }
+        } catch {
+          // Fallback
+        }
+        set((state) => {
+          const updatedUser = state.user
             ? { ...state.user, role }
             : {
                 id: 'usr_demo_switched',
@@ -53,9 +70,13 @@ export const useAuthStore = create<AuthState>()(
                 role,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-              },
-          isAuthenticated: true,
-        })),
+              };
+          return {
+            user: updatedUser,
+            isAuthenticated: true,
+          };
+        });
+      },
     }),
     {
       name: 'zyvora-auth-storage',

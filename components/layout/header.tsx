@@ -82,22 +82,31 @@ export const Header: React.FC = () => {
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
             {/* Quick Role Switcher Pill */}
-            <div className="hidden xl:flex items-center gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+            <div className="hidden xl:flex items-center gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full text-xs font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800">
               <button
-                onClick={() => switchRole(UserRole.CUSTOMER)}
-                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.CUSTOMER ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : ''}`}
+                onClick={async () => {
+                  await switchRole(UserRole.CUSTOMER);
+                  window.location.href = '/customer/account';
+                }}
+                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.CUSTOMER ? 'bg-amber-400 text-zinc-950 font-bold shadow-sm' : 'hover:text-white'}`}
               >
                 Customer
               </button>
               <button
-                onClick={() => switchRole(UserRole.SELLER)}
-                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.SELLER ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : ''}`}
+                onClick={async () => {
+                  await switchRole(UserRole.SELLER);
+                  window.location.href = '/seller/dashboard';
+                }}
+                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.SELLER ? 'bg-amber-400 text-zinc-950 font-bold shadow-sm' : 'hover:text-white'}`}
               >
                 Seller
               </button>
               <button
-                onClick={() => switchRole(UserRole.ADMIN)}
-                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.ADMIN ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : ''}`}
+                onClick={async () => {
+                  await switchRole(UserRole.ADMIN);
+                  window.location.href = '/admin/dashboard';
+                }}
+                className={`px-3 py-1 rounded-full transition-all ${user?.role === UserRole.ADMIN ? 'bg-amber-400 text-zinc-950 font-bold shadow-sm' : 'hover:text-white'}`}
               >
                 Admin
               </button>
