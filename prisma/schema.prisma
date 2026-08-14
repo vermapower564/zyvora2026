@@ -1,0 +1,554 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  DIRECTOR
+  HR
+  FINANCE
+  SALES_MANAGER
+  SALES_EXECUTIVE
+  DIGITAL_MARKETING_MANAGER
+  SEO_EXECUTIVE
+  CONTENT_WRITER
+  GRAPHIC_DESIGNER
+  VIDEO_EDITOR
+  CAMERA_TEAM
+  PROJECT_MANAGER
+  DEVELOPER
+  UI_UX_DESIGNER
+  INTERN
+  CLIENT
+  CUSTOMER
+  SELLER
+  ADMIN
+  EMPLOYEE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SellerStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  phone     String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sellerProfile SellerProfile?
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+}
+
+model SellerProfile {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  storeName      String
+  slug           String       @unique
+  description    String       @db.Text
+  logoUrl        String?
+  bannerUrl      String?
+  rating         Float        @default(5.0)
+  totalSales     Int          @default(0)
+  commissionRate Float        @default(0.10)
+  status         SellerStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[]
+  payouts  Payout[]
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?   @db.Text
+  imageUrl    String?
+  products    Product[]
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  description   String   @db.Text
+  price         Float
+  originalPrice Float?
+  stock         Int      @default(0)
+  categoryId    String
+  sellerId      String
+  images        Json
+  attributes    Json?
+  rating        Float    @default(5.0)
+  reviewCount   Int      @default(0)
+  featured      Boolean  @default(false)
+  tags          Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category Category         @relation(fields: [categoryId], references: [id])
+  seller   SellerProfile    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  reviews  Review[]
+  variants ProductVariant[]
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  productId  String
+  sku        String   @unique
+  title      String?
+  price      Float
+  stock      Int      @default(0)
+  attributes Json
+  images     Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  rating    Int
+  comment   String   @db.Text
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id         String  @id @default(uuid())
+  userId     String
+  fullName   String
+  street     String
+  city       String
+  state      String
+  postalCode String
+  country    String
+  phone      String
+  isDefault  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  userId          String
+  status          OrderStatus @default(PENDING)
+  paymentStatus   String      @default("PENDING")
+  paymentMethod   String
+  subtotal        Float
+  tax             Float
+  shippingFee     Float
+  discount        Float
+  totalAmount     Float
+  trackingNumber  String?
+  shippingAddress Json
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String @id @default(uuid())
+  orderId   String
+  productId String
+  sellerId  String
+  quantity  Int
+  price     Float
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  discountType  String   @default("PERCENTAGE")
+  discountValue Float
+  minSpend      Float?
+  expiryDate    DateTime
+  active        Boolean  @default(true)
+  usedCount     Int      @default(0)
+}
+
+model Payout {
+  id          String   @id @default(uuid())
+  sellerId    String
+  amount      Float
+  status      String   @default("PENDING")
+  requestedAt DateTime @default(now())
+  processedAt DateTime?
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+}
+
+model Employee {
+  id           String   @id @default(uuid())
+  employeeCode String   @unique
+  name         String
+  email        String   @unique
+  role         String
+  department   String
+  designation  String
+  joinDate     DateTime
+  salary       Float
+  status       String   @default("ACTIVE")
+}
+
+model Attendance {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  date         DateTime
+  clockIn      String
+  clockOut     String?
+  status       String   @default("PRESENT")
+  workHours    Float    @default(8.0)
+}
+
+model DailyWorkUpdate {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  date         DateTime
+  taskTitle    String
+  description  String   @db.Text
+  hoursSpent   Float
+  status       String   @default("PENDING")
+  gitCommits   String?
+  driveLinks   String?
+}
+
+model Project {
+  id                   String   @id @default(uuid())
+  name                 String
+  clientName           String
+  budget               Float
+  startDate            DateTime
+  deadline             DateTime
+  status               String   @default("IN_PROGRESS")
+  completionPercentage Int      @default(0)
+}
+
+model Client {
+  id             String @id @default(uuid())
+  name           String
+  company        String
+  email          String @unique
+  phone          String
+  activeProjects Int    @default(0)
+  totalSpent     Float  @default(0)
+}
+
+model SalesDeal {
+  id          String   @id @default(uuid())
+  title       String
+  clientName  String
+  value       Float
+  stage       String   @default("QUALIFIED")
+  probability Int      @default(50)
+  closeDate   DateTime
+}
+
+model FinanceTransaction {
+  id          String   @id @default(uuid())
+  title       String
+  type        String   @default("INCOME")
+  category    String
+  amount      Float
+  date        DateTime
+  status      String   @default("COMPLETED")
+  description String?  @db.Text
+}
+
+model PayrollRecord {
+  id           String    @id @default(uuid())
+  employeeId   String
+  employeeName String
+  monthYear    String
+  baseSalary   Float
+  bonuses      Float     @default(0)
+  deductions   Float     @default(0)
+  netPay       Float
+  status       String    @default("PENDING")
+  paymentDate  DateTime?
+}
+
+model LeaveRequest {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  type         String
+  startDate    DateTime
+  endDate      DateTime
+  reason       String   @db.Text
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+}
+
+model Resignation {
+  id             String   @id @default(uuid())
+  employeeId     String
+  employeeName   String
+  department     String
+  role           String
+  resignationDate DateTime
+  noticePeriod   Int      @default(30)
+  lastWorkingDay DateTime
+  reason         String   @db.Text
+  status         String   @default("SUBMITTED")
+}
+
+model InternStudent {
+  id                String   @id @default(uuid())
+  name              String
+  university        String
+  degree            String
+  department        String
+  mentor            String
+  stipend           Float
+  startDate         DateTime
+  endDate           DateTime
+  performance       Int      @default(80)
+  tasksCompleted    Int      @default(0)
+  githubRepo        String?
+  fullTimeOfferStatus String @default("UNDER_REVIEW")
+}
+
+model DevCommit {
+  id          String   @id @default(uuid())
+  developer   String
+  repository  String
+  branch      String   @default("main")
+  commitHash  String
+  message     String
+  linesAdded  Int
+  linesDeleted Int
+  timestamp   DateTime @default(now())
+}
+
+model SeoKeyword {
+  id           String   @id @default(uuid())
+  keyword      String   @unique
+  searchVolume Int
+  currentRank  Int
+  previousRank Int
+  rankChange   String   @default("STABLE")
+  targetUrl    String
+}
+
+model AdCampaign {
+  id          String @id @default(uuid())
+  name        String
+  platform    String
+  budget      Float
+  adSpend     Float
+  leads       Int
+  cpl         Float
+  roas        Float
+  ctr         Float
+  impressions Int
+}
+
+model DesignAsset {
+  id          String   @id @default(uuid())
+  title       String
+  platform    String
+  format      String
+  designer    String
+  status      String   @default("DRAFT")
+  assetUrl    String?
+  createdAt   DateTime @default(now())
+}
+
+model VideoProduction {
+  id            String   @id @default(uuid())
+  projectTitle  String
+  shootLocation String
+  cameraLead    String
+  editor        String
+  renderStage   String   @default("PRE_PRODUCTION")
+  status        String   @default("IN_PROGRESS")
+  version       String   @default("v1.0")
+}
+
+model ITAsset {
+  id           String   @id @default(uuid())
+  assetTag     String   @unique
+  name         String
+  category     String
+  assignedTo   String?
+  serialNumber String   @unique
+  status       String   @default("AVAILABLE")
+  purchaseDate DateTime
+}
+
+model PdfDocument {
+  id           String   @id @default(uuid())
+  fileName     String
+  category     String
+  fileSize     String
+  uploadedBy   String
+  fileUrl      String
+  verification String   @default("VERIFIED")
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user       String
+  action     String
+  module     String
+  actorId    String?
+  actorRole  String?
+  entityType String?
+  entityId   String?
+  timestamp  DateTime @default(now())
+  ipAddress  String   @default("127.0.0.1")
+  details    String   @db.Text
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ContactPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model ContactMessage {
+  id         String          @id @default(uuid())
+  name       String
+  email      String
+  phone      String?
+  subject    String
+  category   String          @default("General Inquiry")
+  message    String          @db.Text
+  status     ContactStatus   @default(NEW)
+  priority   ContactPriority @default(MEDIUM)
+  assignedTo String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  resolvedAt DateTime?
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  actorName  String
+  actorRole  String
+  action     String
+  module     String
+  entityType String?
+  entityId   String?
+  details    String   @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model InventoryHistory {
+  id            String   @id @default(uuid())
+  productId     String
+  productTitle  String
+  sellerId      String
+  action        String
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  actorId       String
+  reason        String?
+  createdAt     DateTime @default(now())
+}
+
+model PriceHistory {
+  id            String   @id @default(uuid())
+  productId     String
+  productTitle  String
+  previousPrice Float
+  newPrice      Float
+  changedBy     String
+  createdAt     DateTime @default(now())
+
+  @@index([productId, createdAt])
+}
+
+model OrderStatusHistory {
+  id             String   @id @default(uuid())
+  orderId        String
+  previousStatus String?
+  newStatus      String
+  changedBy      String
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model CouponUsage {
+  id             String   @id @default(uuid())
+  couponId       String
+  userId         String
+  orderId        String
+  discountAmount Float
+  usedAt         DateTime @default(now())
+
+  @@index([couponId, userId])
+  @@index([userId])
+}
+
+model ProductHistory {
+  id        String   @id @default(uuid())
+  productId String
+  actorId   String
+  action    String
+  oldValue  String?  @db.Text
+  newValue  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([productId, createdAt])
+}
+
+
+
